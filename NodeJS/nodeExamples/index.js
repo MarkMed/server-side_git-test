@@ -1,16 +1,24 @@
-var circle = require('./circle');
+var circleModule = require('./circle');
 
 function calcCircle(radio){
 	console.log("");
-	console.log("Calculating circle area and longitude with radio = " + radio);
-	if(radio>=0){
-		console.log(">>> The circle with radio of "+radio+" has "+circle.l(radio)+" of longitude and "+circle.a(radio)+" of area.")
+	console.log(">>> Calculating circle area and longitude with radio = " + radio+" ...");
+
+	function circleCallback(err, circle){
+		if(err){
+			console.log("<<< Error: "+err.message);
+		}
+		else {
+			console.log("<<< Result: The circle with radio "+radio+" has an area of "+ circle.a() +" and its longitude is "+circle.l());
+		}
 	}
-	else{
-		console.log("Invalid value of radio: "+radio)
-	}
+	circleModule.circleLogic(radio, circleCallback);
+	
+	console.log(">>> Module called, the values has been returned?");
+	console.log("");
 }
 
 calcCircle(3);
 calcCircle(0);
 calcCircle(-2);
+circleModule.otherWea("texto");
