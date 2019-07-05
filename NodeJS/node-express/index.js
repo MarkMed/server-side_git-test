@@ -1,13 +1,15 @@
 const express = require("express");
 // const fs = require("fs");
+const morgan = require("morgan");
 const hostname = "localhost";
 const http = require("http");
 // const path = require("path");
 const port = 4898;
 
 const app = express();
+app.use(morgan("dev"));
+app.use(express.static(__dirname+"/public"));
 app.use((req, res, next)=>{
-	console.log(req.headers);
 	res.statusCode=200;
 	res.setHeader("Content-type", "text/html");
 	res.end(`
