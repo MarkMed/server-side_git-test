@@ -6,31 +6,12 @@ const hostname = "localhost";
 const http = require("http");
 // const path = require("path");
 const port = 4898;
+const registrationRouter = require("./router/registrationRouter");
 
 const app = express();
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-
-app.all("/payments", (req, res, next)=>{
-	res.statusCode=200;
-	res.setHeader("Content-type", "text/plain");
-	next();
-});
-
-app.get("/payments", (req, res, next)=>{
-	res.end("Must to bring all payment registrarion to you!");
-	
-});
-app.post("/payments", (req, res, next)=>{
-	res.end(`Adding a new registration log. Name: "${req.body.name}", Description: "${req.body.description}".`);	
-});
-app.put("/payments", (req, res, next)=>{
-	res.statusCode = 403;
-	res.end("PUT opartion is forbidden on /payments");
-});
-app.delete("/payments", (req, res, next)=>{
-	res.end("Deleting the whole registrations intances.");	
-});
+app.use("/payments", registrationRouter);
 
 app.get("/payments/:registrationName", (req, res, next)=>{
 	res.end(`Must to bring the payment registrarion "${req.params.registrationName}" to you!`);
