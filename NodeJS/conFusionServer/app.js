@@ -6,6 +6,9 @@ var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const dishesRouter = require("./routes/dishRouter");
+const leadersRouter = require("./routes/leaderRouter");
+const promotionsRouter = require("./routes/promoRouter");
 
 var app = express();
 
@@ -18,6 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use("/dishes", dishesRouter);
+app.use("/leaders", leadersRouter);
+app.use("/promotions", promotionsRouter);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
