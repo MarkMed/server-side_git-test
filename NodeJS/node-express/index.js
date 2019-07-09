@@ -1,33 +1,24 @@
+// modules exports and const definitions
 const bodyParser = require("body-parser")
+const dishesRouter = require("./router/dishRouter");
 const express = require("express");
-// const fs = require("fs");
-const morgan = require("morgan");
 const hostname = "localhost";
 const http = require("http");
-// const path = require("path");
+const leadersRouter = require("./router/leaderRouter");
+const morgan = require("morgan");
 const port = 4898;
-const registrationRouter = require("./router/registrationRouter");
+const promotionsRouter = require("./router/promoRouter");
 
 const app = express();
+
+// including mdules in app
 app.use(morgan("dev"));
 app.use(bodyParser.json());
-app.use("/payments", registrationRouter);
 
-app.get("/payments/:registrationName", (req, res, next)=>{
-	res.end(`Must to bring the payment registrarion "${req.params.registrationName}" to you!`);
-	
-});
-app.post("/payments/:registrationName", (req, res, next)=>{
-	res.statusCode = 403;
-	res.end("POST opartion is forbidden on an already existing resource.");
-});
-app.put("/payments/:registrationName", (req, res, next)=>{
-	res.end(`Updating the registration log. Name: "${req.params.registrationName}" => "${req.body.name}". New description: "${req.body.description}".`);	
-});
-app.delete("/payments/:registrationName", (req, res, next)=>{
-	res.end(`Deleting the registration "${req.params.registrationName}".`);	
-});
-
+// Assinging endpoints
+app.use("/dishes", dishesRouter);
+app.use("/leaders", leadersRouter);
+app.use("/promotions", promotionsRouter);
 app.use(express.static(__dirname+"/public"));
 app.use((req, res, next)=>{
 	res.statusCode=200;
@@ -56,5 +47,6 @@ app.use((req, res, next)=>{
 	`);
 });
 
+// deploy server
 const server = http.createServer(app);
 server.listen(port, hostname, ()=>{console.log(`Server running at http://${hostname}:${port}`)});
