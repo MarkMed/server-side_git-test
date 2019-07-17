@@ -5,40 +5,49 @@ const dbName = "conFusion";
 const dbOperations = require("./operation")
 
 
-mongoClient.connect(url, (error, client)=>{
-	
-	assert.equal(error, null);
+mongoClient.connect(url)
+.then((client)=>{
 	console.log("Successfully connected to server!\n");
 
 	const db = client.db(dbName);
 	const collection = "teachers"
-	dbOperations.insertDocument(db, {"name": "Shaggy", "lastName": "Cosmico"}, collection, (result)=>{
 
-		console.log(`Inserted Document:\n ${result}\n`);
+	dbOperations.insertDocument(db, {"name": "Shaggy", "lastName": "Cosmico"}, collection)
+	.then((result)=>{
 
-		dbOperations.findDocuments(db, collection, (docs)=>{
+		console.log(`Inserted Document:\n ${result.ops}\n`);
+		return dbOperations.findDocuments(db, collection)
+	})
+	.then((docs)=>{
 
-			console.log(`Documents found:\n ${result.ops}\n`);
+		console.log(`Documents found:\n ${docs}\n`);
+		return dbOperations.updateDocument(db, {"name": "Ricardito"}, {"lastName": "Milos"}, collection)
+	})
+	.then((result)=>{
 
-			dbOperations.updateDocument(db, {"name": "Ricarditos"}, {"lastName": "Milos"}, collection, (result)=>{
+		console.log(`Document Updated!\nNew version: ${result.result}\n`);
+		return dbOperations.findDocuments(db, collection)
+	})
+	.then((docs)=>{
 
-				console.log(`Document Updated!\nNew version: ${result.result}\n`);
-
-				dbOperations.findDocuments(db, collection, (docs)=>{
-					
-					console.log(`Documents found:\n ${result.ops}\n`);
-					dbOperations.insertDocument(db, {"name": "TestName", "lastName": "TestLastName"}, collection, (result)=>{
+		console.log(`Documents found:\n ${docs}\n`);
+		return dbOperations.insertDocument(db, {"name": "TestName", "lastName": "TestLastName"}, collection)
+	})
+	.then( (result)=>{
 				
-						console.log(`Inserted Document:\n ${result.ops}\n`);
-						
-						dbOperations.removeDocument(db, {"name": "Shaggy"}, collection, (result)=>{
-							console.log(`Deleted Document:\n ${result.ops}\n`)
-						});
-						// NO drop collection. I do not want lose my memory :´v
-						client.close();
-					});
-				});
-			});
-		});
-	});
-});
+		console.log(`Inserted Document:\n ${result.ops}\n`);						
+		return dbOperations.removeDocument(db, {"name": "Shaggy"}, collection)
+	})
+	.then( (result)=>{
+
+		console.log(`Deleted Document:\n ${result.ops}\n`)
+		return db.dropCollection("teachers")
+	})
+	.then((result)=>{
+	
+		console.log(`Collection drop:\n ${result.ops}\n`)
+		return client.close();				
+	})
+	.catch((err)=>{console.log(err)});
+})
+.catch((err)=>{console.log(err)});
