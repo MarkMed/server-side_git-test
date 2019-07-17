@@ -15,39 +15,58 @@ mongoClient.connect(url)
 	dbOperations.insertDocument(db, {"name": "Shaggy", "lastName": "Cosmico"}, collection)
 	.then((result)=>{
 
-		console.log(`Inserted Document:\n ${result.ops}\n`);
+		console.log("\nInserted Document:\n", result.ops);
 		return dbOperations.findDocuments(db, collection)
 	})
-	.then((docs)=>{
+	.then((data)=>{
 
-		console.log(`Documents found:\n ${docs}\n`);
+		console.log("\nDocuments found:\n", data);
 		return dbOperations.updateDocument(db, {"name": "Ricardito"}, {"lastName": "Milos"}, collection)
 	})
 	.then((result)=>{
 
-		console.log(`Document Updated!\nNew version: ${result.result}\n`);
+		console.log("\nDocument Updated:\n", result.result);
 		return dbOperations.findDocuments(db, collection)
 	})
-	.then((docs)=>{
+	.then((data)=>{
 
-		console.log(`Documents found:\n ${docs}\n`);
+		console.log("\nDocuments found:\n", data);
 		return dbOperations.insertDocument(db, {"name": "TestName", "lastName": "TestLastName"}, collection)
 	})
 	.then( (result)=>{
 				
-		console.log(`Inserted Document:\n ${result.ops}\n`);						
+		console.log("\nInserted Document:\n", result.ops);						
 		return dbOperations.removeDocument(db, {"name": "Shaggy"}, collection)
 	})
 	.then( (result)=>{
 
-		console.log(`Deleted Document:\n ${result.ops}\n`)
+		console.log("\nDeleted Document:\n", result.result);
 		return db.dropCollection("teachers")
 	})
 	.then((result)=>{
 	
-		console.log(`Collection drop:\n ${result.ops}\n`)
+		console.log("\nCollection Dropped:\n", result)
 		return client.close();				
 	})
+	// dbOperations.findDocuments(db, collection)
+	// .then((data)=>{
+
+	// 	console.log("\nDocuments found:\n", data);
+	// 	console.log("\nUpdating docs:\n", data);
+	// 	return dbOperations.updateDocument(db, {"name": "Ricardito"}, {"name": "Ricarditos", "lastName": "Milos"}, collection)
+
+	// })
+	// .then((result)=>{
+
+	//  	console.log("\nDocument Updated:\n", result.result);
+
+	// 	return db.dropCollection("teachers")
+	// })
+	// .then((result)=>{
+	
+	// 	console.log("\nCollection Dropped:\n", result)
+	// 	return client.close();				
+	// })
 	.catch((err)=>{console.log(err)});
 })
 .catch((err)=>{console.log(err)});
