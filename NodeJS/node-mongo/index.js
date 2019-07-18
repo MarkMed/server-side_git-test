@@ -16,12 +16,18 @@ mongoClient.connect(url)
 	.then((result)=>{
 
 		console.log("\nInserted Document:\n", result.ops);
+		return dbOperations.insertDocument(db, {"name": "Ricarditos", "lastName": "Milhos"}, collection)
+	})
+	.then((result)=>{
+
+		console.log("\nInserted Document:\n", result.ops);
 		return dbOperations.findDocuments(db, collection)
 	})
 	.then((data)=>{
 
 		console.log("\nDocuments found:\n", data);
-		return dbOperations.updateDocument(db, {"name": "Ricardito"}, {"lastName": "Milos"}, collection)
+		console.log("\nUpdating docs:\n", data);
+		return dbOperations.updateDocument(db, {"name": "Ricarditos"}, {"name": "Ricarditos", "lastName": "Milos"}, collection)
 	})
 	.then((result)=>{
 
