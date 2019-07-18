@@ -1,0 +1,53 @@
+{
+    "name": "Milangas con Muzza",
+    "description": "Una milangas rikinas de carne, pollo, soja, zapallito, o berenjena. Con muzzarella encima o de relleno.",
+    "image": "https://www.laanonima.com.ar/contents/uploads/recetas/headers/milanesa-de-pollo-a-la-fugazetta.jpg",
+    "category": "Minutas",
+    "label": "Hot",
+    "price": "250",
+    "featured": "true",
+    "comments": [
+    	{
+		    "rating": 9,
+		    "comment": "Very f*cking delicious",
+		    "author": "Jhon Cena"
+		},
+    	{
+		    "rating": 10,
+		    "comment": "The best food that I tasty!",
+		    "author": "El we :v"
+		},
+    	{
+		    "rating": 10,
+		    "comment": "Lo mejor del mundo!",
+		    "author": "The venezuelan man"
+		}
+    ]
+}
+
+{
+    "name": "Tallarines",
+    "description": "Deliciosos tallarines con tuco. La masa de los tallarines varían entre masa al huevo, morron, espinaca, o mixto. La salsa puede ser tuco con carne, con carne picada, vegetariana. ",
+    "image": "https://www.curiosfera.com/wp-content/uploads/2017/11/Receta-pasta-con-carne-y-lim%C3%B3n.jpg",
+    "category": "Pastas",
+    "label": "Hot",
+    "price": "135",
+    "featured": "true",
+    "comments": [
+    	{
+		    "rating": 8,
+		    "comment": "I like it so much :D",
+		    "author": "Jhon Cena"
+		},
+    	{
+		    "rating": 7,
+		    "comment": "Good Tasty!",
+		    "author": "Jean Viener"
+		},
+    	{
+		    "rating": 10,
+		    "comment": "Buena la vaina! Pude comer algo!",
+		    "author": "The venezuelan man"
+		}
+    ]
+}
