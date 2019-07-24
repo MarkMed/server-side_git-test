@@ -3,45 +3,140 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const leadersRouter = express.Router();
 leadersRouter.use(bodyParser.json());
+const mongoose = require("mongoose");
+const Leaders = require("../models/leaders");
 
 // global endpoint
 leadersRouter.route("/")
-.all((req, res, next)=>{
-	res.statusCode=200;
-	res.setHeader("Content-type", "text/plain");
-	next();
-})
 .get((req, res, next)=>{
-	res.end("It should show to you a list of leaders!");
-	
+	console.log("\n\nGetting the whole list of Leaders:\n")
+	Leaders.find({})
+		.then((data)=>{
+			if(!!data){
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			}
+			else{
+				err = new Error(`/leaders not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in get >>> ", err);
+		});
 })
 .post((req, res, next)=>{
-	res.end(`Adding a new leaders To the list. Name: "${req.body.name}", Description: "${req.body.description}".`);	
+	Leaders.create(req.body)
+	.then((data)=>{
+		res.statusCode = 200;
+		res.setHeader("Content-type", "application/json");
+		res.json(data);
+		console.log("\nNew leader added:\n", data);
+	}, (err) => next(err))
+	.catch((err)=>{
+		Leaders.remove({});
+		console.error("Error in post >>> ", err);
+	});
 })
 .put((req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /leaders");
 })
 .delete((req, res, next)=>{
-	res.end("Deleting the whole leaders list.");	
+	Leaders.remove({})
+	.then((resp)=>{
+		console.log("\n\nDeleting all instances.\n");
+		res.statusCode = 200;
+		res.json(resp);
+		console.log("\n\nAll instances has been deleted.\n");
+	}, (err) => next(err))
+	.catch((err)=>{
+		console.error("Error in delete >>> ", err);
+	});
 });
 
 // endpoint with id
 leadersRouter.route("/:leaderId")
 .get((req, res, next)=>{
-	res.end(`The get action has returned the leader with id: "${req.params.leaderId}"`);
+	const leaderId = req.params.leaderId;
+	console.log("\n\nGetting the leader with id: "+leaderId);
+	Leaders.findById(leaderId)
+		.then((data)=>{
+			if(!!data){
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			}
+			else{
+				err = new Error(`Leader #${leaderId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in get /id >>> ", err);
+		});
 })
 .post((req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
 .put((req, res, next)=>{
-	res.write("<i> params to include in the body of request: 'name', 'lastName' </i>");
-	res.write("\n");
-	res.end(`Updating the leader with id: "${req.params.leaderId}". New Name: "${req.body.name}". New Last Name: "${req.body.lastName}".`);	
+	const leaderId = req.params.leaderId;
+	console.log("\n\nUpdating the leader with id: "+leaderId);
+	Leaders.findById(leaderId)
+		.then((data)=>{
+			if(!!data){
+				Leaders.findByIdAndUpdate(
+					leaderId, 
+					{
+						$set: req.body
+					},
+					{
+						new: true
+					}
+				)
+				.then((data)=>{
+					res.statusCode = 200;
+					res.setHeader("Content-type", "application/json");
+					res.json(data);
+				}, (err) => next(err));
+			}
+			else{
+				err = new Error(`Leader #${leaderId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in put /id >>> ", err);
+		});
 })
 .delete((req, res, next)=>{
-	res.end(`Deleting the leader with id: "${req.params.leaderId}".`);	
+	const leaderId = req.params.leaderId;
+	console.log("\n\nDeleting the leader with id: "+leaderId);
+	
+	Leaders.findById(leaderId)
+		.then((data)=>{
+			if(!!data){
+				Leaders.findByIdAndRemove(leaderId)
+				.then((data)=>{
+					res.statusCode = 200;
+					res.setHeader("Content-type", "application/json");
+					res.json(data);
+				}, (err) => next(err));
+			}
+			else{
+				err = new Error(`Leader #${leaderId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in get /id >>> ", err);
+		});
 });
 
 module.exports = leadersRouter;

@@ -12,9 +12,16 @@ dishesRouter.route("/")
 	console.log("\n\nGetting the whole list of dishes:\n")
 	Dishes.find({})
 		.then((data)=>{
-			res.statusCode = 200;
-			res.setHeader("Content-type", "application/json");
-			res.json(data);
+			if(!!data){
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			}
+			else{
+				err = new Error(`/dishes not found.`);
+				err.status = 404;
+				return next(err);
+			}
 		}, (err) => next(err))
 		.catch((err)=>{
 			console.error("Error in get >>> ", err);
@@ -53,12 +60,21 @@ dishesRouter.route("/")
 // endpoint with id
 dishesRouter.route("/:dishId")
 .get((req, res, next)=>{
-	console.log("\n\nGetting the dishe: with id: "+req.params.dishId);
-	Dishes.findById(req.params.dishId)
+	const dishId = req.params.dishId;
+	console.log("\n\nGetting the dishe: with id: "+dishId);
+	Dishes.findById(dishId)
 		.then((data)=>{
-			res.statusCode = 200;
-			res.setHeader("Content-type", "application/json");
-			res.json(data);
+			if(!!data){
+			
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json(data);
+			}
+			else{
+				err = new Error(`Dish ${dishId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
 		}, (err) => next(err))
 		.catch((err)=>{
 			console.error("Error in get /id >>> ", err);
@@ -69,37 +85,59 @@ dishesRouter.route("/:dishId")
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
 .put((req, res, next)=>{
-	console.log("\n\nUpdating the dish with id: "+req.params.dishId);
-	
-	Dishes.findByIdAndUpdate(
-		req.params.dishId, 
-		{
-			$set: req.body
-		},
-		{
-			new: true
-		}
-	)
-	.then((data)=>{
-		res.statusCode = 200;
-		res.setHeader("Content-type", "application/json");
-		res.json(data);
-	}, (err) => next(err))
-	.catch((err)=>{
-		console.error("Error in put /id >>> ", err);
-	});
+	const dishId = req.params.dishId;
+	console.log("\n\nUpdating the dish with id: "+dishId);
+	Dishes.findById(dishId)
+		.then((data)=>{
+			if(!!data){
+				Dishes.findByIdAndUpdate(
+					dishId, 
+					{
+						$set: req.body
+					},
+					{
+						new: true
+					}
+				)
+				.then((data)=>{
+					res.statusCode = 200;
+					res.setHeader("Content-type", "application/json");
+					res.json(data);
+				}, (err) => next(err));
+			}
+			else{
+				err = new Error(`Dish #${dishId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in put /id >>> ", err);
+		});
 })
 .delete((req, res, next)=>{
-	console.log("\n\nDeleting the dish with id: "+req.params.dishId);
-	Dishes.findByIdAndRemove(req.params.dishId)
-	.then((data)=>{
-		res.statusCode = 200;
-		res.setHeader("Content-type", "application/json");
-		res.json(data);
-	}, (err) => next(err))
-	.catch((err)=>{
-		console.error("Error in delete /id >>> ", err);
-	});	
+	const dishId = req.params.dishId;
+	console.log("\n\nDeleting the dish with id: "+dishId);
+	
+	Dishes.findById(dishId)
+		.then((data)=>{
+			if(!!data){
+				Dishes.findByIdAndRemove(dishId)
+				.then((data)=>{
+					res.statusCode = 200;
+					res.setHeader("Content-type", "application/json");
+					res.json(data);
+				}, (err) => next(err));
+			}
+			else{
+				err = new Error(`Dish #${dishId} not found.`);
+				err.status = 404;
+				return next(err);
+			}
+		}, (err) => next(err))
+		.catch((err)=>{
+			console.error("Error in get /id >>> ", err);
+		});
 });
 
 // global comment endpoint

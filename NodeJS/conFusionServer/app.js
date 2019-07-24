@@ -33,6 +33,32 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+function getAuthorization(req, res, next){
+	console.log(req.headers);
+	const authorizationHeader = req.headers.authorization;
+	// Checks if the authorizationHeader has value or not. If null, it ends the function and retunr an error
+	if(!authorizationHeader){
+		const err = new Error("You are not authenticated. Please, log in your account, or create one.");
+		res.setHeader("WWW-Authenticate", "Basic");
+		err.status = 401;
+		return next(err);
+	}
+	const authorization = new Buffer(authorizationHeader.split(" ")[1], "base64").toString().split(":");
+	const username = authorization[0];
+	const password = authorization[1];
+
+	if(username === "markmed" && password === "accessMkMServer4"){
+		return next();
+	}
+	else{
+		const err = new Error("Wrong username or password");
+		res.setHeader("WWW-Authenticate", "Basic");
+		err.status = 401;
+		return next(err);
+	}
+}
+app.use(getAuthorization);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/dishes", dishesRouter);
 app.use("/leaders", leadersRouter);
