@@ -38,48 +38,69 @@ function getAuthorization(req, res, next){
 	const reqHeaders = req.headers;
 	const signedCookie = req.signedCookies;
 	console.log(signedCookie);
+	console.log("\n__________________________________________________\n");
+	console.log("\nChecking if exist a signedCookie with user property setted\n");
 
-	if(!signedCookies.user){
-		// Check if exist the user property setted in the signedCookie	or the signedCookie itself is already installed, if null, it...
+	if(!signedCookie.user){
+		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
 
+		console.log("\nNo signedCookie\n");
+		console.log("\nchecking if the authorizationHeader has value...\n");
 		const authorizationHeader = req.headers.authorization;
-		// ...challenge the user to authenticate and save authenticate info from the header when user submit...
+		// ...challenge the user to authenticate and save the authenticate info from the header when user submit...
 		if(!authorizationHeader){
 		// ...it checks if the authorizationHeader has value or not. If null...
+			console.log("\nauthorizationHeader has not value\n");
 			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
 			res.setHeader("WWW-Authenticate", "Basic");
 			err.status = 401;
-			// ...it ends the function and retunr an error...
+			console.log("\n__________________________________________________\n");
+			// ...it ends the function and returns an error...
 			return next(err);
 		}
-		//...else if authorizationHeader has value, it analize the value wich coms within authorizationHeader...
-		const authorization = new Buffer(authorizationHeader.split(" ")[1], "base64").toString().split(":");
+		console.log("\nauthorizationHeader has value!\n");
+		//...else, if authorizationHeader has value, it analize the value wich comes within authorizationHeader...
+		const authorization = new Buffer.from(authorizationHeader.split(" ")[1], "base64").toString().split(":");
+		console.log("\nprocessing value...\n");
 		const username = authorization[0];
 		const password = authorization[1];
 		//...saves in variables for better understanding...
 
+		console.log("\nchecking if values are corrects...\n");
 		if(username === "markmed" && password === "accessMkMServer4"){
-		//...checks if values are valid. If are valid...
+			console.log("\nthe authorizationHeader has the correct values!\n");
+			console.log("\nSetting up the cookie!\n");
+		//...and checks if values are valid. If are valid...
 			res.cookie("user", "markmed", {signed: true});
+			console.log("\nCookie set!\n");
+			console.log("\n__________________________________________________\n");
 			//...set the cookie with info and sign it...
 			return next();
 		}
 		else{
-			//...else... SEGUIR CON EXPLICACIÓN
+			console.log("\nthe authorizationHeader values are incorrect\n");
+			//...else, it ends the function and returns an error...
 			const err = new Error("Wrong username or password");
 			res.setHeader("WWW-Authenticate", "Basic");
 			err.status = 401;
 			return next(err);
 		}
 	}
-	else{ // ...else 
-		if(signedCookies.user === "markmed"){
+	else{
+		console.log("\nsignedCookie Exist!\n");
+		console.log("\nchecking username...\n");
+		// ...else, if exist the user property setted in the signedCookie or if the signedCookie itself is already installed...
+		if(signedCookie.user === "markmed"){
+			console.log("\nHello "+ signedCookie.user+"!\n");
+			// ...it checks if the user property setted in the signedCookie has the correct value...
 			return next();
 		}
 		else{
 			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
 			err.status = 401;
+			console.log("\n__________________________________________________\n");
 			return next(err);
+			//...else, it ends the function and returns an error...
 		}
 	}
 }
