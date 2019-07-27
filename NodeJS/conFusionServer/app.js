@@ -10,8 +10,8 @@ const dishesRouter = require("./routes/dishRouter");
 const leadersRouter = require("./routes/leaderRouter");
 const promotionsRouter = require("./routes/promoRouter");
 const mongoose = require("mongoose");
-const mongooseCurrency = require("mongoose-currency");
-const Dishes = require("./models/dishes");
+const session = require("express-session");
+const fileStore = require("session-file-store")(session);
 const url = "mongodb://localhost:27017/conFusion";
 const connect = mongoose.connect(url);
 
@@ -32,21 +32,29 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser("0419-0809-2000-1998"));
+// app.use(cookieParser("0419-0809-2000-1998"));
+app.use(session({
+	name: "myNewSession",
+	resave: false,
+    saveUninitialized: false,
+	secret: "0419-0809-2000-1998",
+    store:  new fileStore()
+}));
 
 function getAuthorization(req, res, next){
+	const reqSession = req.session;
 	const reqHeaders = req.headers;
-	const signedCookie = req.signedCookies;
-	console.log(signedCookie);
+	// const signedCookie = req.signedCookies;
+	console.log(reqSession);
 	console.log("\n__________________________________________________\n");
-	console.log("\nChecking if exist a signedCookie with user property setted\n");
+	console.log("\nChecking if exist a session with user property setted\n");
 
-	if(!signedCookie.user){
+	if(!reqSession.user){
 		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
 
-		console.log("\nNo signedCookie\n");
+		console.log("\nNo reqSession\n");
 		console.log("\nchecking if the authorizationHeader has value...\n");
-		const authorizationHeader = req.headers.authorization;
+		const authorizationHeader = reqHeaders.authorization;
 		// ...challenge the user to authenticate and save the authenticate info from the header when user submit...
 		if(!authorizationHeader){
 		// ...it checks if the authorizationHeader has value or not. If null...
@@ -69,10 +77,10 @@ function getAuthorization(req, res, next){
 		console.log("\nchecking if values are corrects...\n");
 		if(username === "markmed" && password === "accessMkMServer4"){
 			console.log("\nthe authorizationHeader has the correct values!\n");
-			console.log("\nSetting up the cookie!\n");
+			console.log("\nSetting up the reqSession!\n");
 		//...and checks if values are valid. If are valid...
-			res.cookie("user", "markmed", {signed: true});
-			console.log("\nCookie set!\n");
+			reqSession.user = "markmed"
+			console.log("\nreqSession set!\n");
 			console.log("\n__________________________________________________\n");
 			//...set the cookie with info and sign it...
 			return next();
@@ -87,11 +95,11 @@ function getAuthorization(req, res, next){
 		}
 	}
 	else{
-		console.log("\nsignedCookie Exist!\n");
+		console.log("\nreqSession Exist!\n");
 		console.log("\nchecking username...\n");
 		// ...else, if exist the user property setted in the signedCookie or if the signedCookie itself is already installed...
-		if(signedCookie.user === "markmed"){
-			console.log("\nHello "+ signedCookie.user+"!\n");
+		if(reqSession.user === "markmed"){
+			console.log("\nHello "+ reqSession.user+"!\n");
 			// ...it checks if the user property setted in the signedCookie has the correct value...
 			return next();
 		}
