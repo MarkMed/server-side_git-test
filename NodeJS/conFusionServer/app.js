@@ -34,12 +34,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser("0419-0809-2000-1998"));
 app.use(session({
-	name: "myNewSession",
+	name: "mySession",
 	resave: false,
     saveUninitialized: false,
 	secret: "0419-0809-2000-1998",
     store:  new fileStore()
 }));
+
 
 function getAuthorization(req, res, next){
 	const reqSession = req.session;
@@ -51,75 +52,41 @@ function getAuthorization(req, res, next){
 
 	if(!reqSession.user){
 		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
-
 		console.log("\nNo reqSession\n");
 		console.log("\nchecking if the authorizationHeader has value...\n");
-		const authorizationHeader = reqHeaders.authorization;
-		// ...challenge the user to authenticate and save the authenticate info from the header when user submit...
-		if(!authorizationHeader){
-		// ...it checks if the authorizationHeader has value or not. If null...
-			console.log("\nauthorizationHeader has not value\n");
-			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-			res.setHeader("WWW-Authenticate", "Basic");
-			err.status = 401;
-			console.log("\n__________________________________________________\n");
-			// ...it ends the function and returns an error...
-			return next(err);
-		}
-		console.log("\nauthorizationHeader has value!\n");
-		//...else, if authorizationHeader has value, it analize the value wich comes within authorizationHeader...
-		const authorization = new Buffer.from(authorizationHeader.split(" ")[1], "base64").toString().split(":");
-		console.log("\nprocessing value...\n");
-		const username = authorization[0];
-		const password = authorization[1];
-		//...saves in variables for better understanding...
-
-		console.log("\nchecking if values are corrects...\n");
-		if(username === "markmed" && password === "accessMkMServer4"){
-			console.log("\nthe authorizationHeader has the correct values!\n");
-			console.log("\nSetting up the reqSession!\n");
-		//...and checks if values are valid. If are valid...
-			reqSession.user = "markmed"
-			console.log("\nreqSession set!\n");
-			console.log("\n__________________________________________________\n");
-			//...set the cookie with info and sign it...
-			return next();
-		}
-		else{
-			console.log("\nthe authorizationHeader values are incorrect\n");
-			//...else, it ends the function and returns an error...
-			const err = new Error("Wrong username or password");
-			res.setHeader("WWW-Authenticate", "Basic");
-			err.status = 401;
-			return next(err);
-		}
+		console.log("\nauthorizationHeader has not value\n");
+		const err = new Error("You are not authenticated. Please, log in your account, or create one.");
+		res.setHeader("WWW-Authenticate", "Basic");
+		err.status = 401;
+		console.log("\n__________________________________________________\n");
+		// ...it ends the function and returns an error...
+		return next(err);
 	}
 	else{
 		console.log("\nreqSession Exist!\n");
 		console.log("\nchecking username...\n");
 		// ...else, if exist the user property setted in the signedCookie or if the signedCookie itself is already installed...
-		if(reqSession.user === "markmed"){
+		if(reqSession.user === "authenticated"){
 			console.log("\nHello "+ reqSession.user+"!\n");
 			// ...it checks if the user property setted in the signedCookie has the correct value...
 			return next();
 		}
 		else{
 			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-			err.status = 401;
+			err.status = 403;
 			console.log("\n__________________________________________________\n");
 			return next(err);
 			//...else, it ends the function and returns an error...
 		}
 	}
 }
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 app.use(getAuthorization);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/dishes", dishesRouter);
 app.use("/leaders", leadersRouter);
 app.use("/promotions", promotionsRouter);
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
