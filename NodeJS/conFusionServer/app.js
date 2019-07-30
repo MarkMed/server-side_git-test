@@ -1,7 +1,7 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
+// var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -14,6 +14,8 @@ const session = require("express-session");
 const fileStore = require("session-file-store")(session);
 const url = "mongodb://localhost:27017/conFusion";
 const connect = mongoose.connect(url);
+const passport = require("passport");
+const authenticate = require("./authenticate");
 
 connect
 .then((db)=>{
@@ -41,43 +43,30 @@ app.use(session({
     store:  new fileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
 
 function getAuthorization(req, res, next){
 	const reqSession = req.session;
-	const reqHeaders = req.headers;
+	// const reqHeaders = req.headers;
 	// const signedCookie = req.signedCookies;
 	console.log(reqSession);
 	console.log("\n__________________________________________________\n");
 	console.log("\nChecking if exist a session with user property setted\n");
 
-	if(!reqSession.user){
+	if(!req.user){
 		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
 		console.log("\nNo reqSession\n");
 		console.log("\nchecking if the authorizationHeader has value...\n");
 		console.log("\nauthorizationHeader has not value\n");
 		const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-		res.setHeader("WWW-Authenticate", "Basic");
-		err.status = 401;
+		err.status = 403;
 		console.log("\n__________________________________________________\n");
 		// ...it ends the function and returns an error...
 		return next(err);
 	}
 	else{
-		console.log("\nreqSession Exist!\n");
-		console.log("\nchecking username...\n");
-		// ...else, if exist the user property setted in the signedCookie or if the signedCookie itself is already installed...
-		if(reqSession.user === "authenticated"){
-			console.log("\nHello "+ reqSession.user+"!\n");
-			// ...it checks if the user property setted in the signedCookie has the correct value...
-			return next();
-		}
-		else{
-			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-			err.status = 403;
-			console.log("\n__________________________________________________\n");
-			return next(err);
-			//...else, it ends the function and returns an error...
-		}
+		next();
 	}
 }
 app.use('/', indexRouter);

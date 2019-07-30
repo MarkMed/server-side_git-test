@@ -1,6 +1,9 @@
 const express = require('express');
+const bodyParser = require("body-parser");
 const userRouter = express.Router();
+userRouter.use(bodyParser.json());
 const userModel= require("../models/user");
+const passport = require("passport");
 
 /* GET users listing. */
 userRouter.route("/")
@@ -9,114 +12,29 @@ userRouter.route("/")
 });
 userRouter.route("/signup")
 .post((req, res, next)=>{
+	// User registration
 	const reqBody = req.body
-	userModel.findOne({username: reqBody.username})
-	.then((data) => {
-		if(data != null) {
-		  var err = new Error('User ' + reqBody.username + ' already exists!');
-		  err.status = 403;
-		  next(err);
+	userModel.register(new userModel({username: reqBody.username}), reqBody.password, (err, data) => {
+		if(err) {
+			res.statusCode = 500;
+			res.setHeader('Content-Type', 'application/json');
+			res.json({err: err});
 		}
 		else {
-		  return userModel.create({
-			username: reqBody.username,
-			password: reqBody.password});
+		  	passport.authenticate("local")(req, res, ()=>{
+				res.statusCode = 200;
+				res.setHeader('Content-Type', 'application/json');
+				res.json({success: true, status: 'Registration Successful!', user: data});
+			});
 		}
-	  })
-	.then((data)=>{
-		res.statusCode = 200;
-		res.setHeader('Content-Type', 'application/json');
-		res.json({status: 'Registration Successful!', user: data});
-	}, (err)=>{
-		next(err)
-	})
-	.catch((err)=>{
-		next(err);
-	})
+	});
 });
-userRouter.route("/login")
-.post((req, res, next)=>{
-	const reqSession = req.session;
-	const reqHeaders = req.headers;
-	if(!reqSession.user){
-		// Checks if exist the user property setted in the session or if the session itself is exist. If null or undefined, it...
-		console.log("\nNo reqSession\n");
-		console.log("\nchecking if the authorizationHeader has value...\n");
-		const authorizationHeader = reqHeaders.authorization;
-		// ...challenge the user to authenticate and save the authenticate info from the header, when user submit...
-		if(!authorizationHeader){
-		// ...it checks if the authorizationHeader has value or not. If null...
-			console.log("\nauthorizationHeader has not value\n");
-			const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-			res.setHeader("WWW-Authenticate", "Basic");
-			err.status = 401;
-			console.log("\n__________________________________________________\n");
-			// ...it ends the function and returns an error...
-			return next(err);
-		}
-		console.log("\nauthorizationHeader has value!\n");
-		//...else, if authorizationHeader has value, it analize the value wich comes within authorizationHeader...
-		const authorization = new Buffer.from(authorizationHeader.split(" ")[1], "base64").toString().split(":");
-		console.log("\nprocessing value...\n");
-		const username = authorization[0]; // username that user has introduce
-		const password = authorization[1]; // password that user has introduce
-		// ...saves in variables for better understanding and managing...
 
-		console.log("\nchecking if values are corrects...\n");
-		userModel.findOne({username: username})		
-		// ...search and return in the DB for a instance of user with the username passed through the authorizationHeader...
-		.then((data)=>{
-			if(!data){
-				// ...if it does not found anything, it returns an error...
-				console.log("\nYou are not authenticated\n");
-				const err = new Error(`You are not authenticated. Please create an account.`);
-				res.setHeader("WWW-Authenticate", "Basic");
-				err.status = 403;
-				return next(err);
-			}
-			else{
-				// ...else, it meaning that the user instances has been found, so...
-				// ...it checks if the properties in the user instances has the values that was passed through the authorizationHeader...
-				if(data.password !== password || data.username !== username){
-					// ...if the values that was passed through the authorizationHeader are incorrect it returns an error...
-					console.log("\nThe authorizationHeader values are incorrect\n");
-					const err = new Error("Incorrect username or password");
-					res.setHeader("WWW-Authenticate", "Basic");
-					err.status = 403;
-					return next(err);
-				}
-				else{
-					// ...else, the values that was passed through the authorizationHeader are correct, and it start the session...
-					console.log("\nthe authorizationHeader has the correct values!\n");
-					console.log("\nSetting up the reqSession!\n");
-					reqSession.user = "authenticated"
-					console.log("\nreqSession set!\n");
-					console.log("\n__________________________________________________\n");
-					//...set the session cookie with info and sign it...
-					res.statusCode = 200;
-					res.setHeader("Content-type", "application/json");
-					
-					res.json({
-						status: "Login Successful",
-						user: data
-					});
-				}
-			}
-		}, (err)=>{
-			next(err)
-		})
-		.catch((err)=>{
-			next(err);
-		})
-	}
-	else{
-		// ...else, if exist the user property setted in the signedCookie or if the signedCookie itself is already installed...
-		console.log("\nreqSession Exist!\n");
-		console.log("\nchecking username...\n");
-		res.statusCode = 200;
-		res.setHeader("Content-type", "text/plain");
-		res.end("You are already authenticated")
-	}
+userRouter.route("/login")
+.post(passport.authenticate("local"), (req, res)=>{
+	res.statusCode = 200;
+	res.setHeader('Content-Type', 'application/json');
+	res.json({success: true, status: 'Login Successful!'});
 });
 
 userRouter.route("/logout")
