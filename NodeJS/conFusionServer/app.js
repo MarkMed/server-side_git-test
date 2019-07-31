@@ -12,10 +12,11 @@ const promotionsRouter = require("./routes/promoRouter");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const fileStore = require("session-file-store")(session);
-const url = "mongodb://localhost:27017/conFusion";
-const connect = mongoose.connect(url);
 const passport = require("passport");
 const authenticate = require("./authenticate");
+const configFile = require("./config");
+
+const connect = mongoose.connect(configFile.mongoUrl);
 
 connect
 .then((db)=>{
@@ -35,44 +36,46 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser("0419-0809-2000-1998"));
-app.use(session({
-	name: "mySession",
-	resave: false,
-    saveUninitialized: false,
-	secret: "0419-0809-2000-1998",
-    store:  new fileStore()
-}));
+// app.use(session({
+// 	name: "mySession",
+// 	resave: false,
+//     saveUninitialized: false,
+// 	secret: "0419-0809-1998-2000",
+//     store:  new fileStore()
+// }));
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
-function getAuthorization(req, res, next){
-	const reqSession = req.session;
-	// const reqHeaders = req.headers;
-	// const signedCookie = req.signedCookies;
-	console.log(reqSession);
-	console.log("\n__________________________________________________\n");
-	console.log("\nChecking if exist a session with user property setted\n");
+// function getAuthorization(req, res, next){
+// 	const reqSession = req.session;
+// 	// const reqHeaders = req.headers;
+// 	// const signedCookie = req.signedCookies;
+// 	console.log(reqSession);
+// 	console.log("\n__________________________________________________\n");
+// 	console.log("\nChecking if exist a session with user property setted\n");
 
-	if(!req.user){
-		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
-		console.log("\nNo reqSession\n");
-		console.log("\nchecking if the authorizationHeader has value...\n");
-		console.log("\nauthorizationHeader has not value\n");
-		const err = new Error("You are not authenticated. Please, log in your account, or create one.");
-		err.status = 403;
-		console.log("\n__________________________________________________\n");
-		// ...it ends the function and returns an error...
-		return next(err);
-	}
-	else{
-		next();
-	}
-}
+// 	if(!req.user){
+// 		// Checks if exist the user property setted in the signedCookie	or if the signedCookie itself is already installed. If null, it...
+// 		console.log("\nNo reqSession\n");
+// 		console.log("\nchecking if the authorizationHeader has value...\n");
+// 		console.log("\nauthorizationHeader has not value\n");
+// 		const err = new Error("You are not authenticated. Please, log in your account, or create one.");
+// 		err.status = 403;
+// 		console.log("\n__________________________________________________\n");
+// 		// ...it ends the function and returns an error...
+// 		return next(err);
+// 	}
+// 	else{
+// 		next();
+// 	}
+// }
+// app.use(getAuthorization);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use(getAuthorization);
+
 app.use(express.static(path.join(__dirname, 'public')));
+
 app.use("/dishes", dishesRouter);
 app.use("/leaders", leadersRouter);
 app.use("/promotions", promotionsRouter);

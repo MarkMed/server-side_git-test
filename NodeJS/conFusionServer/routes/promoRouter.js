@@ -5,6 +5,7 @@ const promotionsRouter = express.Router();
 promotionsRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
 const Promotions = require("../models/Promotions");
+const authenticate = require("../authenticate");
 
 // global endpoint
 promotionsRouter.route("/")
@@ -27,7 +28,7 @@ promotionsRouter.route("/")
 			console.error("Error in get >>> ", err);
 		});
 })
-.post((req, res, next)=>{
+.post(authenticate.verifyUser, (req, res, next)=>{
 	Promotions.create(req.body)
 	.then((data)=>{
 		res.statusCode = 200;
@@ -40,11 +41,11 @@ promotionsRouter.route("/")
 		console.error("Error in post >>> ", err);
 	});
 })
-.put((req, res, next)=>{
+.put(authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /promotions");
 })
-.delete((req, res, next)=>{
+.delete(authenticate.verifyUser, (req, res, next)=>{
 	Promotions.remove({})
 	.then((resp)=>{
 		console.log("\n\nDeleting all instances.\n");
@@ -79,11 +80,11 @@ promotionsRouter.route("/:promotionId")
 			console.error("Error in get /id >>> ", err);
 		});
 })
-.post((req, res, next)=>{
+.post(authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put((req, res, next)=>{
+.put(authenticate.verifyUser, (req, res, next)=>{
 	const promotionId = req.params.promotionId;
 	console.log("\n\nUpdating the promotion with id: "+promotionId);
 	Promotions.findById(promotionId)
@@ -114,7 +115,7 @@ promotionsRouter.route("/:promotionId")
 			console.error("Error in put /id >>> ", err);
 		});
 })
-.delete((req, res, next)=>{
+.delete(authenticate.verifyUser, (req, res, next)=>{
 	const promotionId = req.params.promotionId;
 	console.log("\n\nDeleting the promotion with id: "+promotionId);
 	

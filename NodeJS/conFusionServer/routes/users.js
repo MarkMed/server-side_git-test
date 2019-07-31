@@ -4,6 +4,7 @@ const userRouter = express.Router();
 userRouter.use(bodyParser.json());
 const userModel= require("../models/user");
 const passport = require("passport");
+const authenticate = require("../authenticate");
 
 /* GET users listing. */
 userRouter.route("/")
@@ -11,7 +12,7 @@ userRouter.route("/")
 	res.send('respond with a resource');
 });
 userRouter.route("/signup")
-.post((req, res, next)=>{
+.post((req, res, next)=>{ 
 	// User registration
 	const reqBody = req.body
 	userModel.register(new userModel({username: reqBody.username}), reqBody.password, (err, data) => {
@@ -32,9 +33,11 @@ userRouter.route("/signup")
 
 userRouter.route("/login")
 .post(passport.authenticate("local"), (req, res)=>{
+	const reqUser = req.user
+	const token = authenticate.getToken({_id: reqUser._id});
 	res.statusCode = 200;
 	res.setHeader('Content-Type', 'application/json');
-	res.json({success: true, status: 'Login Successful!'});
+	res.json({success: true, token: token, status: 'Login Successful!'});
 });
 
 userRouter.route("/logout")

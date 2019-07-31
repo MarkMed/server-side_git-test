@@ -5,6 +5,7 @@ const leadersRouter = express.Router();
 leadersRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
 const Leaders = require("../models/leaders");
+const authenticate = require("../authenticate");
 
 // global endpoint
 leadersRouter.route("/")
@@ -27,7 +28,7 @@ leadersRouter.route("/")
 			console.error("Error in get >>> ", err);
 		});
 })
-.post((req, res, next)=>{
+.post(authenticate.verifyUser, (req, res, next)=>{
 	Leaders.create(req.body)
 	.then((data)=>{
 		res.statusCode = 200;
@@ -40,11 +41,11 @@ leadersRouter.route("/")
 		console.error("Error in post >>> ", err);
 	});
 })
-.put((req, res, next)=>{
+.put(authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /leaders");
 })
-.delete((req, res, next)=>{
+.delete(authenticate.verifyUser, (req, res, next)=>{
 	Leaders.remove({})
 	.then((resp)=>{
 		console.log("\n\nDeleting all instances.\n");
@@ -79,11 +80,11 @@ leadersRouter.route("/:leaderId")
 			console.error("Error in get /id >>> ", err);
 		});
 })
-.post((req, res, next)=>{
+.post(authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put((req, res, next)=>{
+.put(authenticate.verifyUser, (req, res, next)=>{
 	const leaderId = req.params.leaderId;
 	console.log("\n\nUpdating the leader with id: "+leaderId);
 	Leaders.findById(leaderId)
@@ -114,7 +115,7 @@ leadersRouter.route("/:leaderId")
 			console.error("Error in put /id >>> ", err);
 		});
 })
-.delete((req, res, next)=>{
+.delete(authenticate.verifyUser, (req, res, next)=>{
 	const leaderId = req.params.leaderId;
 	console.log("\n\nDeleting the leader with id: "+leaderId);
 	
