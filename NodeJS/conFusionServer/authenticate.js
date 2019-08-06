@@ -40,8 +40,11 @@ function verifUser(jwt_payload, done){
 exports.jwtPassport = passport.use(new jwtStrategy(opts, verifUser));
 
 exports.verifyUser = passport.authenticate("jwt", {session: false});
-exports.verifyAdmin = (req)=>{
-    console.log("\nverifyAdmin running");
-    console.log("req.user.admin >> ", req.user.admin);
-    return req.user.admin;;
+exports.verifyAdmin = (req, res, next)=>{
+    if (req.user.admin)
+        next();
+    else
+        let err = new Error("You account does not have the privileges to do this operation or access here.");                      
+        err.status = 403;
+        next(err)
 }

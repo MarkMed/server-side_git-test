@@ -29,46 +29,34 @@ dishesRouter.route("/")
 		console.error("Error getting /dishes >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
-	if(authenticate.verifyAdmin(req)){
-		Dishes.create(req.body)
-		.then((dish)=>{
-			res.statusCode = 200;
-			res.setHeader("Content-type", "application/json");
-			res.json(dish);
-			console.log("\nNew dish added:\n", dish);
-		}, (err) => next(err))
-		.catch((err)=>{
-			Dishes.remove({});
-			console.error("Error in post >>> ", err);
-		});
-	}
-	else{
-		res.statusCode = 403;
-		res.end("You account does not have the privileges to do this operation.");
-	}
+.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+	Dishes.create(req.body)
+	.then((dish)=>{
+		res.statusCode = 200;
+		res.setHeader("Content-type", "application/json");
+		res.json(dish);
+		console.log("\nNew dish added:\n", dish);
+	}, (err) => next(err))
+	.catch((err)=>{
+		Dishes.remove({});
+		console.error("Error in post >>> ", err);
+	});
 })
 .put(authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /dishes");
 })
-.delete(authenticate.verifyUser, (req, res, next)=>{
-	if(authenticate.verifyAdmin(req)){
-		Dishes.remove({})
-		.then((resp)=>{
-			console.log("\n\nDeleting all instances.\n");
-			res.statusCode = 200;
-			res.json(resp);
-			console.log("\n\nAll instances has been deleted.\n");
-		}, (err) => next(err))
-		.catch((err)=>{
-			console.error("Error in delete >>> ", err);
-		});
-	}
-	else {
-		res.statusCode = 403;
-		res.end("You account does not have the privileges to do this operation.");
-	}
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+	Dishes.remove({})
+	.then((resp)=>{
+		console.log("\n\nDeleting all instances.\n");
+		res.statusCode = 200;
+		res.json(resp);
+		console.log("\n\nAll instances has been deleted.\n");
+	}, (err) => next(err))
+	.catch((err)=>{
+		console.error("Error in delete >>> ", err);
+	});
 });
 
 // endpoint with id
@@ -99,71 +87,59 @@ dishesRouter.route("/:dishId")
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
-	if(authenticate.verifyAdmin(req)){
-		const dishId = req.params.dishId;
-		console.log("\n\nUpdating the dish with id: "+dishId);
-		Dishes.findById(dishId)
-		.then((data)=>{
-			if(data){
-				Dishes.findByIdAndUpdate(
-					dishId, 
-					{
-						$set: req.body
-					},
-					{
-						new: true
-					}
-				)
-				.then((data)=>{
-					res.statusCode = 200;
-					res.setHeader("Content-type", "application/json");
-					res.json(data);
-				}, (err) => next(err));
-			}
-			else{
-				err = new Error(`Dish #${dishId} not found.`);
-				err.status = 404;
-				return next(err);
-			}
-		}, (err) => next(err))
-		.catch((err)=>{
-			console.error("Error in put /id >>> ", err);
-		});
-	}
-	else {
-		res.statusCode = 403;
-		res.end("You account does not have the privileges to do this operation.");
-	}
+.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+	const dishId = req.params.dishId;
+	console.log("\n\nUpdating the dish with id: "+dishId);
+	Dishes.findById(dishId)
+	.then((data)=>{
+		if(data){
+			Dishes.findByIdAndUpdate(
+				dishId, 
+				{
+					$set: req.body
+				},
+				{
+					new: true
+				}
+			)
+			.then((data)=>{
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			}, (err) => next(err));
+		}
+		else{
+			err = new Error(`Dish #${dishId} not found.`);
+			err.status = 404;
+			return next(err);
+		}
+	}, (err) => next(err))
+	.catch((err)=>{
+		console.error("Error in put /id >>> ", err);
+	});
 })
-.delete(authenticate.verifyUser,(req, res, next)=>{
-	if(authenticate.verifyAdmin(req)){
-		const dishId = req.params.dishId;
-		console.log("\n\nDeleting the dish with id: "+dishId);
-		Dishes.findById(dishId)
-		.then((data)=>{
-			if(data){
-				Dishes.findByIdAndRemove(dishId)
-				.then((data)=>{
-					res.statusCode = 200;
-					res.setHeader("Content-type", "application/json");
-					res.json(data);
-				}, (err) => next(err));
-			}
-			else{
-				err = new Error(`Dish #${dishId} not found.`);
-				err.status = 404;
-				return next(err);
-			}
-		}, (err) => next(err))
-		.catch((err)=>{
-			console.error("Error in get /id >>> ", err);
-		});
-	}
-	else {
-		res.statusCode = 403;
-		res.end("You account does not have the privileges to do this operation.");
-	}
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+	const dishId = req.params.dishId;
+	console.log("\n\nDeleting the dish with id: "+dishId);
+	Dishes.findById(dishId)
+	.then((data)=>{
+		if(data){
+			Dishes.findByIdAndRemove(dishId)
+			.then((data)=>{
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			}, (err) => next(err));
+		}
+		else{
+			err = new Error(`Dish #${dishId} not found.`);
+			err.status = 404;
+			return next(err);
+		}
+	}, (err) => next(err))
+	.catch((err)=>{
+		console.error("Error in get /id >>> ", err);
+	});
 });
 
 // global comment endpoint
@@ -221,33 +197,27 @@ dishesRouter.route("/:dishId/comments")
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /dishes" + req.params.dishId + "/comments");
 })
-.delete(authenticate.verifyUser, (req, res, next)=>{	
-	if(authenticate.verifyAdmin(req)){
-		Dishes.findById(req.params.dishId)
-		.then((data)=>{
-			if(data != null){
-				data.comments = [];
-				data.save()
-				.then((data)=>{
-					res.statusCode = 200;
-					res.setHeader("Content-type", "application/json");
-					res.json(data);
-				})
-			}
-			else{
-				err = new Error(`Dish ${req.params.dishId} not found.`);
-				err.status = 404;
-				return next(err);
-			}
-		}, (err) => next(err))
-		.catch((err)=>{
-			console.error("Error in delete >>> ", err);
-		});
-	}
-	else {
-		res.statusCode = 403;
-		res.end("You account does not have the privileges to do this operation.");
-	}
+.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+	Dishes.findById(req.params.dishId)
+	.then((data)=>{
+		if(data != null){
+			data.comments = [];
+			data.save()
+			.then((data)=>{
+				res.statusCode = 200;
+				res.setHeader("Content-type", "application/json");
+				res.json(data);
+			})
+		}
+		else{
+			err = new Error(`Dish ${req.params.dishId} not found.`);
+			err.status = 404;
+			return next(err);
+		}
+	}, (err) => next(err))
+	.catch((err)=>{
+		console.error("Error in delete >>> ", err);
+	});
 });
 // endpoint with comment id
 dishesRouter.route("/:dishId/comments/:commentId")

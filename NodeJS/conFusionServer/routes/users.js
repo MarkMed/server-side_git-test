@@ -8,29 +8,23 @@ const authenticate = require("../authenticate");
 
 /* GET users listing. */
 userRouter.route("/")
-.get(authenticate.verifyUser, (req, res, next)=>{	
-	if(authenticate.verifyAdmin(req)){
-		userModel.find({})
-		.then((data)=>{
-			if(data){
-				res.statusCode = 200;
-				res.setHeader("Content-Type", "application/json");
-				res.json(data);
-			}
-			else{
-				err = new Error("/users not found.");
-				err.status = 404;
-				return next(err);
-			}
-		}, err => next(err))
-		.catch((err)=>{
-			console.log("Error getting /users >>> ", err)
-		});
-	}
-	else {
-		res.statusCode = 403;
-		res.end("You cannot acces here. Contact with a <a href='/'>admin</a>");
-	}
+.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{	
+	userModel.find({})
+	.then((data)=>{
+		if(data){
+			res.statusCode = 200;
+			res.setHeader("Content-Type", "application/json");
+			res.json(data);
+		}
+		else{
+			err = new Error("/users not found.");
+			err.status = 404;
+			return next(err);
+		}
+	}, err => next(err))
+	.catch((err)=>{
+		console.log("Error getting /users >>> ", err)
+	});
 });
 userRouter.route("/signup")
 .post((req, res, next)=>{ 
