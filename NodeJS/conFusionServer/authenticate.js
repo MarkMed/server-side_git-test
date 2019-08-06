@@ -20,13 +20,15 @@ const opts = {};
 opts.jwtFromRequest = extractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = configJS.secretKey;
 
-function verifCallback(jwt_payload, done){
+function verifUser(jwt_payload, done){
     console.log("\nJWT Payload: ", jwt_payload);
     userModel.findOne({_id: jwt_payload._id}, (err, userData)=>{
         if(err){
+            console.log("err", err);
             return done(err, false)
         }
         else if(userData){
+            console.log(userData);
             return done(null, userData)
         }
         else{
@@ -35,9 +37,11 @@ function verifCallback(jwt_payload, done){
     });
 }
 
-exports.jwtPassport = passport.use(
-    new jwtStrategy(opts, verifCallback)
-);
+exports.jwtPassport = passport.use(new jwtStrategy(opts, verifUser));
 
 exports.verifyUser = passport.authenticate("jwt", {session: false});
-
+exports.verifyAdmin = (req)=>{
+    console.log("\nverifyAdmin running");
+    console.log("req.user.admin >> ", req.user.admin);
+    return req.user.admin;;
+}

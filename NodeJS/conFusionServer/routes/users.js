@@ -8,8 +8,29 @@ const authenticate = require("../authenticate");
 
 /* GET users listing. */
 userRouter.route("/")
-.get((req, res, next)=>{
-	res.send('respond with a resource');
+.get(authenticate.verifyUser, (req, res, next)=>{	
+	if(authenticate.verifyAdmin(req)){
+		userModel.find({})
+		.then((data)=>{
+			if(data){
+				res.statusCode = 200;
+				res.setHeader("Content-Type", "application/json");
+				res.json(data);
+			}
+			else{
+				err = new Error("/users not found.");
+				err.status = 404;
+				return next(err);
+			}
+		}, err => next(err))
+		.catch((err)=>{
+			console.log("Error getting /users >>> ", err)
+		});
+	}
+	else {
+		res.statusCode = 403;
+		res.end("You cannot acces here. Contact with a <a href='/'>admin</a>");
+	}
 });
 userRouter.route("/signup")
 .post((req, res, next)=>{ 
@@ -17,15 +38,35 @@ userRouter.route("/signup")
 	const reqBody = req.body
 	userModel.register(new userModel({username: reqBody.username}), reqBody.password, (err, data) => {
 		if(err) {
+			console.log("Error in creating user");
 			res.statusCode = 500;
 			res.setHeader('Content-Type', 'application/json');
 			res.json({err: err});
+			return;
 		}
 		else {
-		  	passport.authenticate("local")(req, res, ()=>{
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'application/json');
-				res.json({success: true, status: 'Registration Successful!', user: data});
+			console.log("Creating user");
+			console.log(reqBody.firstname, reqBody.lastname);
+			if(reqBody.firstname){
+				data.firstname = reqBody.firstname
+			}
+			if(reqBody.lastname){
+				data.lastname = reqBody.lastname
+			}
+			data.save((err, data)=>{
+				if(err){
+					console.log("Error Editing user");
+					res.statusCode = 500;
+					res.setHeader('Content-Type', 'application/json');
+					res.json({err: err});
+					return;
+				}
+				console.log("User created!");
+				passport.authenticate("local")(req, res, ()=>{
+					res.statusCode = 200;
+					res.setHeader('Content-Type', 'application/json');
+					res.json({success: true, status: 'Registration Successful!', user: data});
+				});
 			});
 		}
 	});
