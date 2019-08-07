@@ -41,10 +41,13 @@ exports.jwtPassport = passport.use(new jwtStrategy(opts, verifUser));
 
 exports.verifyUser = passport.authenticate("jwt", {session: false});
 exports.verifyAdmin = (req, res, next)=>{
-    if (req.user.admin)
-        next();
-    else
-        let err = new Error("You account does not have the privileges to do this operation or access here.");                      
+    if (req.user.admin){
+		next();
+	}
+    else{
+		err = new Error("You account does not have the privileges to do this operation or access here.");
+		console.log(err);                   
         err.status = 403;
-        next(err)
+		next(err)
+	}
 }
