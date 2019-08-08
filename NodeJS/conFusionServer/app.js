@@ -1,20 +1,23 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-// var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-const dishesRouter = require("./routes/dishRouter");
-const leadersRouter = require("./routes/leaderRouter");
-const promotionsRouter = require("./routes/promoRouter");
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
 const mongoose = require("mongoose");
 const session = require("express-session");
 const fileStore = require("session-file-store")(session);
 const passport = require("passport");
 const authenticate = require("./authenticate");
 const configFile = require("./config");
+
+// const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+
+// Routers
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const dishesRouter = require("./routes/dishRouter");
+const leadersRouter = require("./routes/leaderRouter");
+const promotionsRouter = require("./routes/promoRouter");
+const uploadRouter = require("./routes/uploadRouter");
 
 const connect = mongoose.connect(configFile.mongoUrl);
 
@@ -26,7 +29,7 @@ connect
 	console.error(err);
 });
 
-var app = express();
+const app = express();
 
 app.all("*", (req, res, next)=>{
 	if(req.secure){
@@ -80,14 +83,16 @@ app.use(passport.initialize());
 // 	}
 // }
 // app.use(getAuthorization);
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// EndPoints
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 app.use("/dishes", dishesRouter);
 app.use("/leaders", leadersRouter);
 app.use("/promotions", promotionsRouter);
+app.use("/uploadImage", uploadRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
