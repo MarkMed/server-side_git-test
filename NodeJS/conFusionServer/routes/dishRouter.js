@@ -4,12 +4,16 @@ const bodyParser = require("body-parser");
 const dishesRouter = express.Router();
 dishesRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
+const corsRouter = require("./corsRoute");
 const Dishes = require("../models/dishes");
 const authenticate = require("../authenticate");
 
 // global endpoint
 dishesRouter.route("/")
-.get((req, res, next)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{
+	res.sendStatus(200);
+})
+.get(corsRouter.cors, (req, res, next)=>{
 	console.log("\n\nGetting the whole list of dishes:\n")
 	Dishes.find({})
 	.populate("comments.author")
@@ -29,7 +33,7 @@ dishesRouter.route("/")
 		console.error("Error getting /dishes >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Dishes.create(req.body)
 	.then((dish)=>{
 		res.statusCode = 200;
@@ -42,11 +46,11 @@ dishesRouter.route("/")
 		console.error("Error in post >>> ", err);
 	});
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /dishes");
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Dishes.remove({})
 	.then((resp)=>{
 		console.log("\n\nDeleting all instances.\n");
@@ -61,7 +65,10 @@ dishesRouter.route("/")
 
 // endpoint with id
 dishesRouter.route("/:dishId")
-.get((req, res, next)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{
+	res.sendStatus(200);
+})
+.get(corsRouter.cors, (req, res, next)=>{
 	const dishId = req.params.dishId;
 	console.log("\n\nGetting the dishe: with id: "+dishId);
 	Dishes.findById(dishId)
@@ -83,11 +90,11 @@ dishesRouter.route("/:dishId")
 		console.error("Error in get /id >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const dishId = req.params.dishId;
 	console.log("\n\nUpdating the dish with id: "+dishId);
 	Dishes.findById(dishId)
@@ -118,7 +125,7 @@ dishesRouter.route("/:dishId")
 		console.error("Error in put /id >>> ", err);
 	});
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const dishId = req.params.dishId;
 	console.log("\n\nDeleting the dish with id: "+dishId);
 	Dishes.findById(dishId)
@@ -144,7 +151,10 @@ dishesRouter.route("/:dishId")
 
 // global comment endpoint
 dishesRouter.route("/:dishId/comments")
-.get((req, res, next)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{
+	res.sendStatus(200);
+})
+.get(corsRouter.cors, (req, res, next)=>{
 	console.log("\n\nGetting the whole list of dishes:\n")
 	Dishes.findById(req.params.dishId)
 	.populate("comments.author")
@@ -165,7 +175,7 @@ dishesRouter.route("/:dishId/comments")
 		console.error("Error in get >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	Dishes.findById(req.params.dishId)
 	.then((data)=>{
 		if(data != null){
@@ -193,11 +203,11 @@ dishesRouter.route("/:dishId/comments")
 		console.error("Error in post >>> ", err);
 	});	
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /dishes" + req.params.dishId + "/comments");
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Dishes.findById(req.params.dishId)
 	.then((data)=>{
 		if(data != null){
@@ -221,7 +231,10 @@ dishesRouter.route("/:dishId/comments")
 });
 // endpoint with comment id
 dishesRouter.route("/:dishId/comments/:commentId")
-.get((req, res, next)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{
+	res.sendStatus(200);
+})
+.get(corsRouter.cors, (req, res, next)=>{
 	console.log("\n\nGetting the dishe: with id: "+req.params.dishId);
 	Dishes.findById(req.params.dishId)
 	.populate("comments.author")
@@ -249,11 +262,11 @@ dishesRouter.route("/:dishId/comments/:commentId")
 		console.error("Error in get /id >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST operation is forbidden on an already existing comment.");
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	console.log("\n\nUpdating the comment with id "+req.params.commentId+" of dish with id: "+req.params.dishId);
 	Dishes.findById(req.params.dishId)
 	.then((data)=>{
@@ -304,7 +317,7 @@ dishesRouter.route("/:dishId/comments/:commentId")
 		console.error("Error in put /id >>> ", err);
 	});
 })
-.delete(authenticate.verifyUser, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	console.log("\n\nDeleting the dish with id: "+req.params.dishId);
 	Dishes.findById(req.params.dishId)
 	.then((data)=>{

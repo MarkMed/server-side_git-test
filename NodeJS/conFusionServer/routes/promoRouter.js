@@ -6,9 +6,11 @@ promotionsRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
 const Promotions = require("../models/Promotions");
 const authenticate = require("../authenticate");
+const corsRouter = require("./corsRoute");
 
 // global endpoint
 promotionsRouter.route("/")
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
 .get((req, res, next)=>{
 	console.log("\n\nGetting the whole list of Promotions:\n")
 	Promotions.find({})
@@ -28,7 +30,7 @@ promotionsRouter.route("/")
 			console.error("Error in get >>> ", err);
 		});
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Promotions.create(req.body)
 	.then((data)=>{
 		res.statusCode = 200;
@@ -41,11 +43,11 @@ promotionsRouter.route("/")
 		console.error("Error in post >>> ", err);
 	});
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /promotions");
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Promotions.remove({})
 	.then((resp)=>{
 		console.log("\n\nDeleting all instances.\n");
@@ -60,6 +62,7 @@ promotionsRouter.route("/")
 
 // endpoint with id
 promotionsRouter.route("/:promotionId")
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
 .get((req, res, next)=>{
 	const promotionId = req.params.promotionId;
 	console.log("\n\nGetting the promotion with id: "+promotionId);
@@ -80,11 +83,11 @@ promotionsRouter.route("/:promotionId")
 			console.error("Error in get /id >>> ", err);
 		});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const promotionId = req.params.promotionId;
 	console.log("\n\nUpdating the promotion with id: "+promotionId);
 	Promotions.findById(promotionId)
@@ -115,7 +118,7 @@ promotionsRouter.route("/:promotionId")
 		console.error("Error in put /id >>> ", err);
 	});
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const promotionId = req.params.promotionId;
 	console.log("\n\nDeleting the promotion with id: "+promotionId);
 	Promotions.findById(promotionId)

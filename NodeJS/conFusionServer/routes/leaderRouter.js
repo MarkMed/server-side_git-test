@@ -6,9 +6,11 @@ leadersRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
 const Leaders = require("../models/leaders");
 const authenticate = require("../authenticate");
+const corsRouter = require("./corsRoute");
 
 // global endpoint
 leadersRouter.route("/")
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
 .get((req, res, next)=>{
 	console.log("\n\nGetting the whole list of Leaders:\n")
 	Leaders.find({})
@@ -28,7 +30,7 @@ leadersRouter.route("/")
 			console.error("Error in get >>> ", err);
 		});
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	Leaders.create(req.body)
 	.then((data)=>{
 		res.statusCode = 200;
@@ -41,11 +43,11 @@ leadersRouter.route("/")
 		console.error("Error in post >>> ", err);
 	});
 })
-.put(authenticate.verifyUser, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("PUT opartion is forbidden on /leaders");
 })
-.delete(authenticate.verifyUser, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	Leaders.remove({})
 	.then((resp)=>{
 		console.log("\n\nDeleting all instances.\n");
@@ -60,6 +62,7 @@ leadersRouter.route("/")
 
 // endpoint with id
 leadersRouter.route("/:leaderId")
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
 .get((req, res, next)=>{
 	const leaderId = req.params.leaderId;
 	console.log("\n\nGetting the leader with id: "+leaderId);
@@ -80,11 +83,11 @@ leadersRouter.route("/:leaderId")
 		console.error("Error in get /id >>> ", err);
 	});
 })
-.post(authenticate.verifyUser, (req, res, next)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	res.statusCode = 403;
 	res.end("POST opartion is forbidden on an already existing resource.");
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const leaderId = req.params.leaderId;
 	console.log("\n\nUpdating the leader with id: "+leaderId);
 	Leaders.findById(leaderId)
@@ -115,7 +118,7 @@ leadersRouter.route("/:leaderId")
 		console.error("Error in put /id >>> ", err);
 	});
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
 	const leaderId = req.params.leaderId;
 	console.log("\n\nDeleting the leader with id: "+leaderId);
 	Leaders.findById(leaderId)

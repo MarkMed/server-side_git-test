@@ -5,6 +5,7 @@ const uploadRouter = express.Router();
 uploadRouter.use(bodyParser.json());
 const authenticate = require("../authenticate");
 const multer = require("multer");
+const corsRouter = require("./corsRoute");
 
 const memory = multer.diskStorage(
     {
@@ -38,18 +39,19 @@ function notAllowedOper(res, operation){
 }
 // global endpoint
 uploadRouter.route("/")
-.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
+.get(corsRouter.cors, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     notAllowedOper(res, "GET");
 })
-.put(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.put(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     notAllowedOper(res, "PUT");
 })
-.post(authenticate.verifyUser, authenticate.verifyAdmin, upload.single("imageFile"), (req, res)=>{
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, upload.single("imageFile"), (req, res)=>{
     res.statusCode=200;
     res.setHeader("Content-Type", "application/json");
     res.json(req.file);
 })
-.delete(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{
     notAllowedOper(res, "DELETE");
 });
 

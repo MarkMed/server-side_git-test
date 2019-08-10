@@ -5,10 +5,12 @@ userRouter.use(bodyParser.json());
 const userModel= require("../models/user");
 const passport = require("passport");
 const authenticate = require("../authenticate");
+const corsRouter = require("./corsRoute");
 
 /* GET users listing. */
 userRouter.route("/")
-.get(authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{	
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); })
+.get(corsRouter.cors, authenticate.verifyUser, authenticate.verifyAdmin, (req, res, next)=>{	
 	userModel.find({})
 	.then((data)=>{
 		if(data){
@@ -27,7 +29,7 @@ userRouter.route("/")
 	});
 });
 userRouter.route("/signup")
-.post((req, res, next)=>{ 
+.post(corsRouter.corsWithOptions, (req, res, next)=>{ 
 	// User registration
 	const reqBody = req.body
 	userModel.register(new userModel({username: reqBody.username}), reqBody.password, (err, data) => {
@@ -67,7 +69,7 @@ userRouter.route("/signup")
 });
 
 userRouter.route("/login")
-.post(passport.authenticate("local"), (req, res)=>{
+.post(corsRouter.corsWithOptions, passport.authenticate("local"), (req, res)=>{
 	const reqUser = req.user
 	const token = authenticate.getToken({_id: reqUser._id});
 	res.statusCode = 200;
@@ -76,7 +78,7 @@ userRouter.route("/login")
 });
 
 userRouter.route("/logout")
-.get((req, res)=>{
+.options(corsRouter.corsWithOptions, (req, res)=>{ 	res.sendStatus(200); }) .get((req, res)=>{
 	const reqSession = req.session;
 	if(reqSession){
 		// Checks if exist a session opened...
