@@ -97,4 +97,21 @@ userRouter.route("/logout")
 
 	}
 });
+
+userRouter.route("/facebook/token")
+.get(passport.authenticate("facebook-token"), (req, res)=>{
+	console.log("GET request in /facebook/token ");
+	const reqUser = req.user
+	if(reqUser){
+		const token = authenticate.getToken({_id: reqUser._id});
+		res.statusCode = 200;
+		res.setHeader('Content-Type', 'application/json');
+		res.json({success: true, token: token, status: 'Login with FB successful!'});
+	}
+	else{
+		res.statusCode = 404;
+		res.setHeader('Content-Type', 'application/json');
+		res.json({success: false, status: 'Login with FB failed'});
+	}
+})
 module.exports = userRouter;
