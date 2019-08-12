@@ -17,7 +17,8 @@ favoriteRouter.route("/")
 .get(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
 	console.log("\n\nGetting the whole favorites list:\n")
 	favoriteModel.find({})
-	.populate("comments.author") // INVESTIGAR!!!!
+	.populate("user")
+	.populate("dishes")
 	.then((data)=>{
 		if(data){
 			res.statusCode = 200;
