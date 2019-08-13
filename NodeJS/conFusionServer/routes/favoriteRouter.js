@@ -1,8 +1,8 @@
 // modules exports and const definitions
 const express = require("express");
 const bodyParser = require("body-parser");
-const favoriteRouter = express.Router();
-favoriteRouter.use(bodyParser.json());
+const favoritesRouter = express.Router();
+favoritesRouter.use(bodyParser.json());
 const mongoose = require("mongoose");
 const corsRouter = require("./corsRoute");
 const favoriteModel = require("../models/favorites");
@@ -14,9 +14,9 @@ function forbiddenOper(res, operation, endpoint){
 }
 
 // global endpoint
-favoriteRouter.route("/")
-.get((req, res, next)=>{
-    console.log(req.user._id);
+favoritesRouter.route("/")
+.get(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
+    console.log("req.user._id", req.user._id);
 	console.log("\n\nGetting the whole favorites list:\n")
 	/*favoriteModel.find({})
 	.populate("user")
@@ -36,7 +36,7 @@ favoriteRouter.route("/")
 		.catch((err)=>{
 		console.error("Error getting /favorites >>> ", err);
     });*/
-    res.end(req.user._id);
+    res.end("check at the console");
 })
 .post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
 .put((req, res, next)=>{
@@ -45,7 +45,7 @@ favoriteRouter.route("/")
 .delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
 
 // endpoint with id
-favoriteRouter.route("/:dishId")
+favoritesRouter.route("/:dishId")
 .get((req, res, next)=>{
     forbiddenOper(res, "GET", "/favorites/:dishId");
 })
@@ -53,4 +53,6 @@ favoriteRouter.route("/:dishId")
 .put((req, res, next)=>{
     forbiddenOper(res, "PUT", "/favorites/:dishId");
 })
-.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{});
+
+module.exports = favoritesRouter;
