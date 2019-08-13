@@ -13,10 +13,12 @@ function forbiddenOper(res, operation, endpoint){
     res.end(`${operation} operation is forbidden on ${endpoint}`);
 }
 
+// global endpoint
 favoriteRouter.route("/")
-.get(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{
+.get((req, res, next)=>{
+    console.log(req.user._id);
 	console.log("\n\nGetting the whole favorites list:\n")
-	favoriteModel.find({})
+	/*favoriteModel.find({})
 	.populate("user")
 	.populate("dishes")
 	.then((data)=>{
@@ -26,27 +28,29 @@ favoriteRouter.route("/")
 			res.json(data);
 		}
 		else{
-			err = new Error(`/dishes not found.`);
+			err = new Error(`/favorites not found.`);
 			err.status = 404;
 			return next(err);
 		}
 	}, (err) => next(err))
 		.catch((err)=>{
-		console.error("Error getting /dishes >>> ", err);
-    });
+		console.error("Error getting /favorites >>> ", err);
+    });*/
+    res.end(req.user._id);
 })
-.post()
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
 .put((req, res, next)=>{
     forbiddenOper(res, "PUT", "/favorites");
 })
-.delete()
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
 
+// endpoint with id
 favoriteRouter.route("/:dishId")
 .get((req, res, next)=>{
     forbiddenOper(res, "GET", "/favorites/:dishId");
 })
-.post()
+.post(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})
 .put((req, res, next)=>{
     forbiddenOper(res, "PUT", "/favorites/:dishId");
 })
-.delete()
+.delete(corsRouter.corsWithOptions, authenticate.verifyUser, (req, res, next)=>{})

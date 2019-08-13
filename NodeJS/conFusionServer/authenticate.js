@@ -22,6 +22,7 @@ opts.jwtFromRequest = extractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = configJS.secretKey;
 
 function verifUser(jwt_payload, done){
+	console.log("Running user verification");
 	console.log("\nJWT Payload: ", jwt_payload);
 	userModel.findOne({_id: jwt_payload._id}, (err, userData)=>{
 		if(err){
@@ -42,12 +43,12 @@ exports.jwtPassport = passport.use(new jwtStrategy(opts, verifUser));
 
 exports.verifyUser = passport.authenticate("jwt", {session: false});
 exports.verifyAdmin = (req, res, next)=>{
+	console.log("Running admin verification");
 	if (req.user.admin){
 		next();
 	}
 	else{
 		err = new Error("You account does not have the privileges to do this operation or access here.");
-		console.log(err);
 		err.status = 403;
 		next(err)
 	}

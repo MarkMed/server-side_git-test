@@ -94,7 +94,7 @@ app.use("/dishes", dishesRouter);
 app.use("/leaders", leadersRouter);
 app.use("/promotions", promotionsRouter);
 app.use("/uploadImage", uploadRouter);
-app.use("/favorites", uploadRouter);
+app.use("/favorites", favoritesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
