@@ -162,7 +162,6 @@ dishesRouter.route("/:dishId/comments")
 		if(data != null){
 			res.statusCode = 200;
 			res.setHeader("Content-type", "application/json");
-			console.log(data.comments[0]);
 			res.json(data.comments);
 		}
 		else{
