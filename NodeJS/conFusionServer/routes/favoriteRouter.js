@@ -178,12 +178,9 @@ favoritesRouter.route("/:dishId")
 			if(data.dishes.indexOf(req.params.dishId) === (-1)){
 				data.dishes.push(req.params.dishId);      
 				data.save()
-				favoriteModel.findById(data._id)
-				.populate("user")
-				.populate("dishes")
 				res.statusCode = 200;
 				res.setHeader("Content-type", "application/json");
-				res.end(`dish ${req.params.dishId} removed from favorites.`);
+				res.end(`dish ${req.params.dishId} added to favorites.`);
 			}
 			else{
 				res.end("Dish already added in the favorite list")
